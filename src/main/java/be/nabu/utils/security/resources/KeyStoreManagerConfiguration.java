@@ -93,6 +93,7 @@ public class KeyStoreManagerConfiguration {
 		}
 	}
 
+	@XmlRootElement(name = "keystore")
 	public static class KeyStoreConfiguration {
 
 		private URI uri;

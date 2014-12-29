@@ -24,45 +24,52 @@ import be.nabu.utils.security.resources.KeyStoreManagerConfiguration.KeyStoreCon
 public class ManagedKeyStoreImpl implements ManagedKeyStore {
 	
 	private KeyStoreHandler handler;
-	private KeyStoreManagerImpl manager;
+	private KeyStoreConfigurationHandler configurationHandler;
 	private KeyStoreConfiguration configuration;
 	private Resource resource;
+	private boolean saveOnChange = true;
 	
-	ManagedKeyStoreImpl(KeyStoreManagerImpl manager, Resource resource, KeyStoreConfiguration configuration, KeyStoreHandler handler) {
+	public ManagedKeyStoreImpl(KeyStoreConfigurationHandler configurationHandler, Resource resource, KeyStoreConfiguration configuration, KeyStoreHandler handler) {
 		this.handler = handler;
 		this.configuration = configuration;
-		this.manager = manager;
+		this.configurationHandler = configurationHandler;
 		this.resource = resource;
 	}
 	
 	public void set(String alias, X509Certificate certificate) throws KeyStoreException, IOException {
 		handler.set(alias, certificate);
-		// save the keystore
-		save();
+		if (saveOnChange) {
+			// save the keystore
+			save();
+		}
 	}
 	
 	@Override
 	public void set(String alias, SecretKey secretKey, String password) throws KeyStoreException, IOException {
 		// add to keystore
 		handler.set(alias, secretKey, password);
-		// save the keystore
-		save();
 		// add password to configuration
 		configuration.getKeyPasswords().put(alias, password);
-		// store the configuration
-		manager.saveConfiguration();
+		if (saveOnChange) {
+			// save the keystore
+			save();
+			// store the configuration
+			configurationHandler.save(configuration);
+		}
 	}
 
 	@Override
 	public void set(String alias, PrivateKey privateKey, X509Certificate [] chain, String password) throws KeyStoreException, IOException {
 		// add to keystore
 		handler.set(alias, privateKey, chain, password);
-		// save the keystore
-		save();
 		// add password to configuration
 		configuration.getKeyPasswords().put(alias, password);
-		// store the configuration
-		manager.saveConfiguration();
+		if (saveOnChange) {
+			// save the keystore
+			save();
+			// store the configuration
+			configurationHandler.save(configuration);
+		}
 	}
 	
 	@Override
@@ -76,7 +83,9 @@ public class ManagedKeyStoreImpl implements ManagedKeyStore {
 		catch (NoSuchAlgorithmException e) {
 			throw new RuntimeException(e);
 		}
-		save();
+		if (saveOnChange) {
+			save();
+		}
 	}
 	
 	public String getPassword() {
@@ -90,11 +99,15 @@ public class ManagedKeyStoreImpl implements ManagedKeyStore {
 	@Override
 	public void delete(String alias) throws KeyStoreException, IOException {
 		handler.delete(alias);
-		save();
+		if (saveOnChange) {
+			save();
+		}
 		// check if there was a password for this alias, delete it if necessary
 		if (configuration.getKeyPasswords().containsKey(alias)) {
 			configuration.getKeyPasswords().remove(alias);
-			manager.saveConfiguration();
+			if (saveOnChange) {
+				configurationHandler.save(configuration);
+			}
 		}
 	}
 	
@@ -131,6 +144,10 @@ public class ManagedKeyStoreImpl implements ManagedKeyStore {
 	
 	@Override
 	public void save() throws IOException {
+		save(resource);
+	}
+	
+	public void save(Resource resource) throws IOException {
 		if (resource instanceof WritableResource) {
 			WritableContainer<ByteBuffer> output = ((WritableResource) resource).getWritable();
 			try {
@@ -169,5 +186,13 @@ public class ManagedKeyStoreImpl implements ManagedKeyStore {
 	
 	public KeyStoreConfiguration getConfiguration() {
 		return configuration;
+	}
+
+	public boolean isSaveOnChange() {
+		return saveOnChange;
+	}
+
+	public void setSaveOnChange(boolean saveOnChange) {
+		this.saveOnChange = saveOnChange;
 	}
 }

@@ -39,7 +39,7 @@ import be.nabu.utils.security.resources.KeyStoreManagerConfiguration.KeyStoreCon
  * @author alex
  *
  */
-public class KeyStoreManagerImpl implements KeyStoreManager {
+public class KeyStoreManagerImpl implements KeyStoreManager, KeyStoreConfigurationHandler {
 	
 	private KeyStoreManagerConfiguration configuration;
 	
@@ -232,5 +232,21 @@ public class KeyStoreManagerImpl implements KeyStoreManager {
 
 	public KeyStoreManagerConfiguration getConfiguration() {
 		return configuration;
+	}
+
+	@Override
+	public void save(KeyStoreConfiguration keystore) throws IOException {
+		boolean found = false;
+		for (int i = 0; i < configuration.getKeyStores().size(); i++) {
+			if (configuration.getKeyStores().get(i).getAlias().equals(keystore.getAlias())) {
+				configuration.getKeyStores().set(i, keystore);
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			configuration.getKeyStores().add(keystore);
+		}
+		saveConfiguration();
 	}
 }
