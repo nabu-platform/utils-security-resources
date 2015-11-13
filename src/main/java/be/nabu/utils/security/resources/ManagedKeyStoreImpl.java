@@ -11,6 +11,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import javax.crypto.SecretKey;
+import javax.net.ssl.SSLContext;
 
 import be.nabu.libs.resources.api.Resource;
 import be.nabu.libs.resources.api.WritableResource;
@@ -18,6 +19,8 @@ import be.nabu.utils.io.IOUtils;
 import be.nabu.utils.io.api.ByteBuffer;
 import be.nabu.utils.io.api.WritableContainer;
 import be.nabu.utils.security.KeyStoreHandler;
+import be.nabu.utils.security.SSLContextType;
+import be.nabu.utils.security.SecurityUtils;
 import be.nabu.utils.security.api.ManagedKeyStore;
 import be.nabu.utils.security.resources.KeyStoreManagerConfiguration.KeyStoreConfiguration;
 
@@ -194,5 +197,15 @@ public class ManagedKeyStoreImpl implements ManagedKeyStore {
 
 	public void setSaveOnChange(boolean saveOnChange) {
 		this.saveOnChange = saveOnChange;
+	}
+
+	@Override
+	public SSLContext newContext(SSLContextType type) throws KeyStoreException {
+		try {
+			return SecurityUtils.createSSLContext(type, SecurityUtils.createKeyManagers(handler.getKeyStore(), configuration.getPassword()), SecurityUtils.createTrustManagers(handler.getKeyStore()));
+		}
+		catch (Exception e) {
+			throw new KeyStoreException("Failed to create new context", e);
+		} 
 	}
 }
