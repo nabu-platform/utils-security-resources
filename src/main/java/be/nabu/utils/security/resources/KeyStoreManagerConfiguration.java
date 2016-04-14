@@ -54,7 +54,7 @@ public class KeyStoreManagerConfiguration {
 		public HashMap<String, String> unmarshal(AliasPasswordEntry [] arg0) throws Exception {
 			HashMap<String, String> values = new HashMap<String, String>();
 			for (AliasPasswordEntry entry : arg0)
-				values.put(entry.getPassword(), entry.getAlias());
+				values.put(entry.getAlias(), entry.getPassword());
 			return values;
 		}
 
