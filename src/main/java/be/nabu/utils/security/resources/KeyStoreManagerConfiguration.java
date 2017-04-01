@@ -24,6 +24,7 @@ import be.nabu.utils.io.api.ByteBuffer;
 import be.nabu.utils.io.api.ReadableContainer;
 import be.nabu.utils.io.api.WritableContainer;
 import be.nabu.utils.security.EncryptionXmlAdapter;
+import be.nabu.utils.security.StoreType;
 
 @XmlRootElement(name="keystoreManager")
 public class KeyStoreManagerConfiguration {
@@ -99,7 +100,8 @@ public class KeyStoreManagerConfiguration {
 		private URI uri;
 		private String alias;
 		private String password;
-
+		private StoreType type;
+		
 		/**
 		 * All the passwords for the private keys (null or non-existent if no password)
 		 */
@@ -136,6 +138,14 @@ public class KeyStoreManagerConfiguration {
 		public void setUri(URI uri) {
 			this.uri = uri;
 		}
+		
+		public StoreType getType() {
+			return type == null ? StoreType.JKS : type;
+		}
+		public void setType(StoreType type) {
+			this.type = type;
+		}
+		
 	}
 	
 	public static KeyStoreManagerConfiguration unmarshal(InputStream input) throws JAXBException {
