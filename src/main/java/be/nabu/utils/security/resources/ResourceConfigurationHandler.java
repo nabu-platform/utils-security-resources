@@ -21,9 +21,15 @@ import be.nabu.utils.security.resources.KeyStoreManagerConfiguration.KeyStoreCon
 public class ResourceConfigurationHandler implements KeyStoreConfigurationHandler {
 
 	private Resource resource;
+	private Class<? extends KeyStoreConfiguration> configurationClass;
 
 	public ResourceConfigurationHandler(Resource resource) {
+		this(resource, KeyStoreConfiguration.class);
+	}
+	
+	public ResourceConfigurationHandler(Resource resource, Class<? extends KeyStoreConfiguration> configurationClass) {
 		this.resource = resource;
+		this.configurationClass = configurationClass;
 	}
 		
 	@Override
@@ -37,7 +43,7 @@ public class ResourceConfigurationHandler implements KeyStoreConfigurationHandle
 	}
 	
 	public void marshal(KeyStoreConfiguration configuration, OutputStream container) throws JAXBException {
-		JAXBContext context = JAXBContext.newInstance(KeyStoreConfiguration.class);
+		JAXBContext context = JAXBContext.newInstance(configurationClass);
 		Marshaller marshaller = context.createMarshaller();
 		marshaller.marshal(configuration, container);
 	}
@@ -52,13 +58,13 @@ public class ResourceConfigurationHandler implements KeyStoreConfigurationHandle
 		}
 	}
 	
-	public static KeyStoreConfiguration unmarshal(InputStream input) throws JAXBException {
-		JAXBContext context = JAXBContext.newInstance(KeyStoreConfiguration.class);
+	public KeyStoreConfiguration unmarshal(InputStream input) throws JAXBException {
+		JAXBContext context = JAXBContext.newInstance(configurationClass);
 		Unmarshaller unmarshaller = context.createUnmarshaller();
 		return (KeyStoreConfiguration) unmarshaller.unmarshal(input);
 	}
 	
-	public static KeyStoreConfiguration unmarshal(ReadableResource resource) throws IOException, JAXBException {
+	public KeyStoreConfiguration unmarshal(ReadableResource resource) throws IOException, JAXBException {
 		ReadableContainer<ByteBuffer> data = resource.getReadable();
 		try {
 			return unmarshal(IOUtils.toInputStream(data));

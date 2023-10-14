@@ -91,10 +91,12 @@ public class ManagedKeyStoreImpl implements ManagedKeyStore {
 		}
 	}
 	
+	@Override
 	public String getPassword() {
 		return configuration.getPassword();
 	}
 	
+	@Override
 	public String getPassword(String alias) {
 		return configuration.getKeyPasswords().get(alias);
 	}
