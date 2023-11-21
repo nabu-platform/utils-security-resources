@@ -139,7 +139,7 @@ public class KeyStoreManagerConfiguration {
 		}
 		
 		public StoreType getType() {
-			return type == null ? StoreType.JKS : type;
+			return type;
 		}
 		public void setType(StoreType type) {
 			this.type = type;
