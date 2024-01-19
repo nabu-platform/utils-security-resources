@@ -58,13 +58,34 @@ public class ResourceConfigurationHandler implements KeyStoreConfigurationHandle
 		}
 	}
 	
-	public KeyStoreConfiguration unmarshal(InputStream input) throws JAXBException {
+	// currently unused, if we delete the deprecated, we can rename these before using them
+	// older servers (like wauters) had a dependency to it @2023-12-11
+	KeyStoreConfiguration unmarshalLocal(InputStream input) throws JAXBException {
+		return unmarshal(input, configurationClass);
+	}
+	KeyStoreConfiguration unmarshalLocal(ReadableResource resource) throws IOException, JAXBException {
+		ReadableContainer<ByteBuffer> data = resource.getReadable();
+		try {
+			return unmarshal(IOUtils.toInputStream(data), configurationClass);
+		}
+		finally {
+			data.close();
+		}
+	}
+	
+	public static KeyStoreConfiguration unmarshal(InputStream input, Class<?> configurationClass) throws JAXBException {
 		JAXBContext context = JAXBContext.newInstance(configurationClass);
 		Unmarshaller unmarshaller = context.createUnmarshaller();
 		return (KeyStoreConfiguration) unmarshaller.unmarshal(input);
 	}
-	
-	public KeyStoreConfiguration unmarshal(ReadableResource resource) throws IOException, JAXBException {
+
+	// currently retained for backwards compatibility
+	@Deprecated
+	public static KeyStoreConfiguration unmarshal(InputStream input) throws JAXBException {
+		return unmarshal(input, KeyStoreConfiguration.class);
+	}
+	@Deprecated
+	public static KeyStoreConfiguration unmarshal(ReadableResource resource) throws IOException, JAXBException {
 		ReadableContainer<ByteBuffer> data = resource.getReadable();
 		try {
 			return unmarshal(IOUtils.toInputStream(data));

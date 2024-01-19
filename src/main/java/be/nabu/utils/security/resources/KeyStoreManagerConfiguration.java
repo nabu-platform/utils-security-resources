@@ -94,6 +94,10 @@ public class KeyStoreManagerConfiguration {
 		}
 	}
 
+	// for older servers (only one client currently) which can not be update, this annotation has to be active, otherwise the discrepancy between the old keystore module on the server and the new developer means you can't open keystores
+	// however, for newer servers, if we enable this, the extension (added in a later update) has the _same_ root element as this one. this conflict means it can choose the wrong class (which it seemingly does without hesitation) which leads to classcast exceptions
+	// so we need to keep this disabled
+//	@XmlRootElement(name = "keystore")
 	public static class KeyStoreConfiguration {
 
 		private URI uri;
